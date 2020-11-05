@@ -9,6 +9,7 @@
 #include "SDL_keyboard.h"
 using namespace std;
 
+//permet d'enregistrer les infos de tapage brut
 class Utilisateur {
 public:
 	string pseudo;
@@ -25,20 +26,20 @@ public:
 	void setTempsUt(vector<int> v);
 	void setTempsUt();
 
-	double moyenne_ij(int a, int b);
-	double variance_ij(int a, int b);
-	void writeToFile();
-	void writeToFilebis();
+	double moyenne_ij(int a, int b); // calcule la moyenne de la différence des colonnes a et b de tempsut 
+	double variance_ij(int a, int b);// calcule la variance de la différence des colonnes a et b de tempsut 
+	void writeToFile(); //crée ou met a jour le fichier users.txt
+	void writeToFileold(); //désuet
 
 };
 
 
-Utilisateur UserConstruct();
+Utilisateur UserConstruct(); //desuet
 
-ostream& operator<<(ostream& os, const Utilisateur& user);
+ostream& operator<<(ostream& os, const Utilisateur& user); //affichage utilisateur pour tests
 
-void CreerFichierUti();
+void CreerFichierUti(); //crée un nouveau fichier pseudo.txt en demandant à l'utilisateur son pseudo et son mdp
 
-void StoreData(Utilisateur user);
+void StoreData(Utilisateur user); //enregistre une nouvelle instance de mot de passe tapé et l'inscrit dans le fichier pseudo.txt
 
-Utilisateur LireUtilisateur(string pseudo);
+Utilisateur LireUtilisateur(string pseudo); //genere un utilisateur avec son pseudo et son mdp à l'aide du fichier pseudo.txt
