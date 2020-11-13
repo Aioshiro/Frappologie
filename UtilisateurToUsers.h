@@ -27,7 +27,8 @@ public:
 	void setTempsUt();
 
 	double moyenne_ij(int a, int b); // calcule la moyenne de la différence des colonnes a et b de tempsut 
-	double variance_ij(int a, int b);// calcule la variance de la différence des colonnes a et b de tempsut 
+	double variance_ij(int a, int b);// calcule la variance de la différence des colonnes a et b de tempsut
+	double covariance_ij(int xa, int xb, int ya, int yb);// calcule la covariance entre la différence des colonnes xa et xb et la difference des colonnes ya et yb de tempsut 
 	void writeToFile(); //crée ou met a jour le fichier users.txt
 	void writeToFileold(); //désuet
 

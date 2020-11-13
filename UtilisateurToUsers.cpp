@@ -41,8 +41,10 @@ void Utilisateur::setTempsUt() {
                 tempstappage.push_back(stoi(donnee));
             }
         }
-        this->setTempsUt(tempstappage);
-        tempstappage.clear();
+        if (!tempstappage.empty()) {
+            this->setTempsUt(tempstappage);
+            tempstappage.clear();
+        }
         donnee = "";
     }
     file.close();
@@ -51,7 +53,7 @@ void Utilisateur::setTempsUt() {
 double Utilisateur::moyenne_ij(int a, int b) {// calcule la moyenne de la différence des colonnes a et b de tempsut
 	double moy = 0;
 	int n = TempsUt.size();
-	for (int i = 0; i <n-1; i++) {
+	for (int i = 0; i <n; i++) {
 		moy += abs(TempsUt[i][a]-TempsUt[i][b]);
 	}
 	return(moy / n);
@@ -61,12 +63,22 @@ double Utilisateur::variance_ij(int a, int b) {// calcule la variance de la diff
     double moy = moyenne_ij(a,b);
     int n = TempsUt.size();
     double variance = 0;
-    for (int i = 0; i < n - 1; i++) {
-        moy += (abs(TempsUt[i][a] - TempsUt[i][b])-moy)* (abs(TempsUt[i][a] - TempsUt[i][b]) - moy);
+    for (int i = 0; i < n; i++) {
+        variance += (abs(TempsUt[i][a] - TempsUt[i][b])-moy)* (abs(TempsUt[i][a] - TempsUt[i][b]) - moy);
     }
     return(variance / n);
 }
 
+double Utilisateur::covariance_ij(int xa, int xb,int ya ,int yb) {// calcule la covariance entre la différence des colonnes xa et xb et la difference des colonnes ya et yb de tempsut 
+    double moyx = moyenne_ij(xa, xb);
+    double moyy = moyenne_ij(ya, yb);
+    int n = TempsUt.size();
+    double covariance = 0;
+    for (int i = 0; i < n; i++) {
+        covariance += (abs(TempsUt[i][xa] - TempsUt[i][xb]) - moyx) * (abs(TempsUt[i][ya] - TempsUt[i][yb]) - moyy);
+    }
+    return(covariance / n);
+}
 
 void Utilisateur::writeToFileold() {
 	ofstream fs;
@@ -137,16 +149,36 @@ void Utilisateur::writeToFile() { //crée ou met a jour le fichier users.txt
     fs1 << pseudo << ';' << mdp << ';'; //on recopie l'utilisateur à ajouter / mettre à jour
     cout << TempsUt[0].size() << endl;
     fs1 << this->moyenne_ij(0, TempsUt[0].size() - 1) << ';';
-    //fs1 << this->variance_ij(0, TempsUt[0].size() - 1) << ';';
 
     for (int j = 0; j < mdp.size(); j++) {
         fs1 << this->moyenne_ij(2 * j, 2 * j + 1) << ';';
-        //fs1 << this->variance_ij(2 * j, 2 * j + 1) << ';';
-    } // Calculs et écriture dans le fichier des temps d'appuis sur chacune des touches du mdp
+    } // Calculs et écriture dans le fichier des moyennes de temps d'appuis sur chacune des touches du mdp
     for (int j = 0; j < mdp.size() - 1; j++) {
         fs1 << this->moyenne_ij(2 * j, 2 * j + 2) << ';';
-        //fs1 << this->variance_ij(2 * j, 2 * j + 2) << ';';
-    } // Calculs et écriture dans le fichier des temps entre un premier début d'appui et un second
+    } // Calculs et écriture dans le fichier des moyennes temps entre un premier début d'appui et un second
+    /*Calcul de la partie supérieur de la matrice de covariance*/
+    fs1 << this->variance_ij(0, TempsUt[0].size() - 1) << ';';
+    for (int i = 0; i < mdp.size(); i++) {
+        fs1 << this->covariance_ij(0, TempsUt[0].size() - 1, 2 * i, 2 * i + 1) << ';'; //Covariance entre le temps total et les temps d'appuis
+    }
+    for (int i = 0; i < mdp.size()-1; i++) {
+        fs1 << this->covariance_ij(0, TempsUt[0].size() - 1, 2 * i, 2 * i + 2) << ';'; //Covariance entre le temps total et le temps entre deux appuis
+    }
+    for (int i = 0; i < mdp.size() ; i++) {
+        fs1 <<  this->variance_ij(2 * i, 2 * i + 1) << ';'; //variance d'un temps d'appui
+        for (int j = i + 1; j < mdp.size(); j++) {
+            fs1 << this->covariance_ij(2*j, 2*j+1, 2 * i, 2 * i + 1) << ';'; //Covariance entre les temps d'appuis
+        }
+        for (int j = 0; j < mdp.size()-1; j++) {
+            fs1 << this->covariance_ij(2 * j, 2 * j + 2, 2 * i, 2 * i + 1) << ';'; //Covariance entre les temps d'appuis et les temps entre appui
+        }
+    }
+    for (int i = 0; i < mdp.size()-1; i++) {
+        fs1 << this->variance_ij(2 * i, 2 * i + 2) << ';'; //variance des temps entres appui
+        for (int j = i + 1; j < mdp.size() - 1; j++) {
+            fs1 << this->covariance_ij(2 * j, 2 * j + 2, 2 * i, 2 * i + 2) << ';'; //covariance entre les temps entre appui
+        }
+    }
     fs1 << "f;" << endl;
     fs1.close();
 }

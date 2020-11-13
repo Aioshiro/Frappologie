@@ -31,3 +31,89 @@ double norme(vector<double> v) {
 	}
 	return sqrt(norm);
 }
+
+vector<vector <double>> calculL(int n,vector<double> infos) {
+    vector<vector <double>> L;
+    int indice = 0;
+    double l = sqrt(infos[indice]);
+    L.push_back({ l });
+    indice += 1;
+    for (int i = 1; i < n; i++) {
+        L.push_back({ infos[indice] / l });
+        indice += 1;
+    }
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (j < i) {
+                L[j].push_back(0);
+            }
+            else if (i == j) {
+                double s = 0;
+                for (int k = 0; k < i; k++) {
+                    s += L[i][k] * L[i][k];
+                }
+                l = sqrt(infos[indice] - s);
+                L[i].push_back(l);
+                indice += 1;
+            }
+            else {
+                double s = 0;
+                for (int k = 0; k < i; k++) {
+                    s += L[i][k] * L[j][k];
+                }
+                L[j].push_back((infos[indice] - s) / l);
+                indice += 1;
+            }
+        }
+    }
+    return(L);
+}
+
+vector<vector <double>> inversionL(vector<vector <double>> L,int n) {
+    vector<vector <double>> I;
+    I.resize(n);
+    for (int i = 0; i < n; i++) {
+        I[i].resize(n);
+    }
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {
+            if (j>i) {
+                I[i][j] = 0;
+            }
+            else if (i == j) {
+                I[i][j] = 1 / L[i][j];
+            }
+            else {
+                double s = 0;
+                for (int k = 0; k < i; k++) {
+                    s -= L[i][k] * I[k][j];
+                }
+                I[i][j] = s / L[i][i];
+            }
+        }
+    }
+    return(I);
+}
+
+vector<double> produitmatricevec(vector<double> X, vector<vector<double>> M) {
+    int n = X.size();
+    vector<double> resu(n);
+    for (int i = 0; i < n; i++) {
+        double s = 0;
+        for (int k = 0; k < n; k++) {
+            s += X[k] * M[k][i];
+        }
+        X[i] = s;
+    }
+    return X;
+}
+
+void lecture(vector<vector<double>> L) {
+    for (int i = 0; i < L.size(); i++) {
+        for (int j = 0; j < L[i].size(); j++) {
+            cout << L[i][j]<< " ; ";
+        }
+        cout << endl;
+    }
+}
+
