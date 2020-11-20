@@ -1,7 +1,10 @@
 #include "SDL.h"
 #include "SDL_keyboard.h"
+#include "UtilisateurBase.h"
 #include "UtilisateurToUsers.h"
+#include "UtilisateurToUsersMulti.h"
 #include "UserToTest.h"
+#include "UserToTestMulti.h"
 #include "calculs.h"
 #include <iostream>
 #include <stdio.h>
@@ -25,48 +28,102 @@ int main(int argc, char* argv[]) {
         SDL_Quit();
         return (-1);
     }
-    string rep = "";
-    cout << "Voulez-vous creer un nouvel utilisateur ? Repondre par 'oui' ou 'non' " << endl;
-    cin >> rep;
-    if (rep == "oui") {
-        CreerFichierUti();
-    }
-    cout << "Veuillez vous identifier (ecrire le nom d'utilisateur) " << endl;
-    cin >> rep;
-    Utilisateur uti1 = LireUtilisateur(rep); //Ajouter une exception pour si l'utilisateur n'existe pas
-    cout << "Voulez-vous entrer de nouvelles donnees de votre fichier ? Repondre par 'oui' ou 'non' " << endl;
-    cin >> rep;
-    bool updateneeded = false;
-    while (rep == "oui") { // Ajouter une exception si l'utilisateur rentre n'importe quoi
-        StoreData(uti1);
-        cout << "Voulez-vous entrer de nouvelles donnees de votre fichier ? Repondre par 'oui' ou 'non' " << endl;
-        cin >> rep;
-        updateneeded = true;
 
-    }
-    if (updateneeded) {
-        //Mettre à jour users.txt
-        uti1.setTempsUt();
-        uti1.writeToFile();
-    }
-    else{
-        //création d'une liste de tous les utilisateurs
-    }
-    
-    cout << "Souhaitez vous vous connecter ? (oui/non)" << endl;
-    cin >> rep;
-    if (rep == "oui") {
-        cout << "Tapez votre identifiant" << endl;
+    bool quit = false;
+    while (!quit) {
+        cout << "Actions possibles :" << endl;
+        cout << "1 - Voulez-vous creer un nouvel utilisateur ?" << endl;
+        cout << "2 - Voulez-vous creer un nouvel utilisateur (multi) ?" << endl;
+        cout << "3 - Voulez-vous entrer de nouvelles donnees de votre fichier ?" << endl;
+        cout << "4 - Voulez-vous entrer de nouvelles donnees de votre fichier ? (multi)" << endl;
+        cout << "5 - Souhaitez vous vous connecter ? (un seul utilisateur)" << endl;
+        cout << "6 - Souhaitez vous vous connecter ? (multi utilisateur)" << endl;
+        cout << "7 - Quitter l'application" << endl;
+        int rep = 0;
         cin >> rep;
-        User nouv(rep);
-        rep = "";
-        do{
-            vector<Uint32> donnees = StoreData(nouv);
-            cout <<"Votre score est de " << nouv.CalculScore1(donnees) << endl;
-            cout << "Votre score est de " << nouv.CalculScore2(donnees) << endl;
-            cout << "Souhaitez vous continuer ? (oui/non)" << endl;
-            cin >> rep;
-        } while (rep == "oui");
+        switch (rep) {
+        case 1: {
+            CreerFichierUti();
+            break;
+        }
+        case 2: {
+            CreerFichierUtiMulti();
+            break;
+        }
+        case 3: {
+            cout << "Veuillez vous identifier (ecrire le nom d'utilisateur) " << endl;
+            string reponse = "";
+            cin >> reponse;
+            Utilisateur uti1 = LireUtilisateur(reponse); //Ajouter une exception pour si l'utilisateur n'existe pas
+            do {
+                StoreData(uti1);
+                cout << "Voulez-vous entrer d'autres donnees dans votre fichier ? (y/n)" << endl;
+                cin >> reponse;
+            } while (reponse == "y");
+            uti1.setTempsUt();
+            uti1.writeToFile();
+            break; }
+        case 4: {
+            cout << "Veuillez vous identifier (ecrire le nom d'utilisateur) " << endl;
+            string reponse = "";
+            cin >> reponse;
+            UtilisateurMulti uti1 = LireUtilisateurMulti(reponse); //Ajouter une exception pour si l'utilisateur n'existe pas
+            do {
+                StoreData(uti1);
+                cout << "Voulez-vous entrer d'autres donnees dans votre fichier ? (y/n)" << endl;
+                cin >> reponse;
+            } while (reponse == "y");
+            uti1.setTempsUt();
+            uti1.writeToFile();
+            break;
+        }
+        case 5: {
+            cout << "Tapez votre identifiant" << endl;
+            string reponse = "";
+            cin >> reponse;
+            User nouv(reponse);
+            reponse = "";
+            do {
+                vector<Uint32> donnees = StoreData(nouv);
+                double score1 = nouv.CalculScore1(donnees);
+                double score2 = nouv.CalculScore2(donnees);
+                cout << "Votre score est de " << score1 << endl;
+                cout << "Votre score est de " << score2 << endl;
+                if (score1 < 0.0002 && score2 < 0.00007) {
+                    cout << "Accepte" << endl;
+                }
+                else {
+                    cout << "Refuse" << endl;
+                }
+                cout << "Souhaitez vous continuer ? (y/n)" << endl;
+                cin >> reponse;
+            } while (reponse == "y");
+            break; }
+        case 6: {
+            cout << "Tapez le mdp" << endl;
+            string reponse = "";
+            cin >> reponse;
+            UserMulti nouv;
+            reponse = "";
+            do {
+                vector<Uint32> donnees = StoreData(nouv);
+                cout << "to do" << endl;
+                /* TO DO : 
+                -recuperer la chaque utilisateur et leur score
+                -renvoyer l'utilisateur avec le/les scores les plus bas
+                */
+                cout << "Souhaitez vous continuer ? (y/n)" << endl;
+                cin >> reponse;
+            } while (reponse == "y");
+            break;
+        }
+        case 7:
+            quit = true;
+            break;
+        default:
+            cout << "Numero incorrect, reessayez" << endl;
+            break;
+        }
 
     }
     SDL_Quit();
