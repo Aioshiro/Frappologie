@@ -24,6 +24,7 @@ double CalcScore(vector<double> vecteurInit, double valeur) {
 	double variance = varianceVect(vecteurInit);
 	return(1/(sqrt(2*3.14159 * variance))*exp(-1/(2*variance)*(valeur-moy)* (valeur - moy)));
 }
+
 double norme(vector<double> v) {
 	double norm = 0;
 	for (int i = 0; i < v.size(); i++) {

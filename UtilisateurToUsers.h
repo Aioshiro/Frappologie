@@ -7,22 +7,18 @@
 #include <cstdlib>
 #include "SDL.h"
 #include "SDL_keyboard.h"
+#include "UtilisateurBase.h"
 using namespace std;
 
 //permet d'enregistrer les infos de tapage brut
-class Utilisateur {
+class Utilisateur : public UtilisateurBase{
 public:
-	string pseudo;
-	string mdp;
 	vector<vector<int>> TempsUt;
 
 	Utilisateur();
 	Utilisateur(string pseudo, string mdp);
-	string getPseudo()const;
-	string getMdp()const;
+
 	vector<vector<int>> getTempsUt()const;
-	void setPseudo(string pseudo);
-	void setMdp(string mdp);
 	void setTempsUt(vector<int> v);
 	void setTempsUt();
 

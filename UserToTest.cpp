@@ -11,24 +11,8 @@ User::User(string pseudo, string mdp) {
 	mdp = mdp;
 }
 
-string User::getPseudo()const {
-	return pseudo;
-}
-
-string User::getMdp()const {
-	return mdp;
-}
-
 vector<double> User::getInfos()const {
 	return infos;
-}
-
-void User::setPseudo(string pseudo) {
-	this->pseudo = pseudo;
-}
-
-void User::setMdp(string mdp) {
-	this->mdp = mdp;
 }
 
 void User::setInfos(vector<double> v) {
@@ -63,7 +47,7 @@ vector<Uint32> StoreData(User uti) {
     string tapage = "";
     bool quit = false;
     vector<Uint32> temps;
-    cout << "Ecrivez votre mot de passe : (Dans la fenêtre blanche et tapez entrée quand vous avez fini)" << endl;
+    cout << "Ecrivez votre mot de passe : (Dans la fenetre blanche et tapez entree quand vous avez fini)" << endl;
     SDL_FlushEvent(SDL_KEYDOWN);
     SDL_FlushEvent(SDL_KEYUP);
     while (!quit) {
@@ -73,32 +57,26 @@ vector<Uint32> StoreData(User uti) {
                 if (event.key.repeat == 0) {
                     if (event.key.keysym.sym == SDLK_KP_ENTER || event.key.keysym.sym == SDLK_RETURN) {
                         quit = true;
-                        if (tapage == uti.getMdp()) {
-                            cout << "Mot de passe accepté" << endl;
+                        if (tapage == uti.getMdp()&&temps.size() == 2 * uti.getMdp().size()) {
+                            cout << "Mot de passe accepte" << endl;
                             for (int i = 0; i < temps.size(); i++) {
                                 return (temps);
                             }
 
                         }
                         else {
-                            cout << "Mauvais mot de passe" << endl;
+                            cout << "Mauvais mot de passe/donnees incorrectes" << endl;
                             StoreData(uti);
                         }
                         
                     }
                     else if (event.key.keysym.sym == SDLK_SPACE) {
                         tapage += " ";
+                        temps.push_back(event.key.timestamp);
                     }
                     else if (event.key.keysym.sym == SDLK_BACKSPACE) {
-                        if (tapage != "") {
-                            tapage.pop_back();
-                        }
-                        if (!temps.empty()) {
-                            temps.pop_back();
-                        }
-                        if (!temps.empty()) {
-                            temps.pop_back();
-                        }
+                        tapage = "";
+                        temps.clear();
 
                     }
                     else if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT) {
@@ -116,7 +94,7 @@ vector<Uint32> StoreData(User uti) {
                 break;
             case SDL_KEYUP:
                 if (event.key.repeat == 0) {
-                    if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_BACKSPACE && event.key.keysym.sym != SDLK_RETURN && event.key.keysym.sym != SDLK_SPACE) {
+                    if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_BACKSPACE && event.key.keysym.sym != SDLK_RETURN) {
                         temps.push_back(event.key.timestamp);
                     }
                 }
@@ -137,10 +115,10 @@ vector<double> User::transfoEntree(vector<Uint32> entree) {
     entrebis.push_back(entree[2*mdp.size() -1] - entree[0]);
     for (int j = 0; j < mdp.size(); j++) {
         entrebis.push_back(entree[2 * j + 1] - entree[2 * j]);
-    } // Calculs et écriture dans le fichier des temps d'appuis sur chacune des touches du mdp
+    } // Calculs et ajout dans le vecteur des temps d'appuis sur chacune des touches du mdp
     for (int j = 0; j < mdp.size() - 1; j++) {
         entrebis.push_back(entree[2 * j + 2] - entree[2 * j]);
-    } // Calculs et écriture dans le fichier des temps entre un premier début d'appui et un second
+    } // Calculs et ajout dans le vecteur des temps entre un premier début d'appui et un second
     
     return(entrebis);
 }
@@ -173,7 +151,7 @@ vector<vector <double>> User::calculL() {
         for (int k = 0; k < i; k++) {
             s += pow(L[i][k],2);
         }
-        l = sqrt(abs(infos[indice] - s));
+        l = sqrt(infos[indice] - s);
         for (int j = 0; j < n; j++) {
             if (j < i) {
                 L[j].push_back(0);
@@ -197,7 +175,6 @@ vector<vector <double>> User::calculL() {
 
 vector<vector <double>> User::Linversee() {
     vector<vector <double>> L = this->calculL();
-    lecture(L);
     vector<vector <double>> I;
     int n = 2 * mdp.size();
     I.resize(n);
@@ -231,6 +208,10 @@ double User::CalculScore2(vector<Uint32> entree) { //calcule un score dépendant 
         diff.push_back(entrebis[i] - this->infos[i]);
     }
     double normesup = norme(produitmatricevec(diff, this->Linversee()));
+    if (isnan(normesup)) {
+        cout << "Calcul de score 2 impossible, donnees insuffisantes" << endl;
+        return normesup;
+    }
     double normeentrebis = norme(entrebis);
     double normeinfos = norme(this->infos);
     return pow(normesup,2)/ (normeentrebis * normeinfos);
