@@ -4,12 +4,10 @@
 //permet d'enregistrer les infos de tapage brut
 class UtilisateurMulti : public Utilisateur {
 public:
-
 	UtilisateurMulti();
 	UtilisateurMulti(string pseudo);
 
-	void setTempsUt();
-	void setTempsUt(vector<int> v);
+	void setTempsUt();//set les temps de tapage d'un utilisateur à partir des données de son fichier
 	void writeToFile(); //crée ou met a jour le fichier users.txt
 
 };

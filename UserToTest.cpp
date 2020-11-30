@@ -6,7 +6,7 @@ User::User(){
 	mdp = "";
 }
 
-User::User(string pseudo, string mdp) {
+User::User(string pseudo, string mdp) { //crée un user avec son mdp et son mot de passe
 	pseudo = pseudo;
 	mdp = mdp;
 }
@@ -19,12 +19,12 @@ void User::setInfos(vector<double> v) {
 	infos = v;
 }
 
-User::User(string pseudout) {
+User::User(string pseudout) { //fct qui récupère les données d'un utilisateur lorsque l'on tape son pseudo
 	ifstream file;
 
 	file.open("users.txt", ifstream::in);
 	string donnee = "";
-	while (!(donnee == pseudout || donnee == '\n' +pseudout || file.peek()==EOF)) {
+	while (!(donnee == pseudout || donnee == '\n' +pseudout || file.peek()==EOF)) { //on cherche l'utilisateur dans le fichier
 		getline(file, donnee, ';');
 	}
 	if (file.peek() == EOF) {
@@ -33,7 +33,7 @@ User::User(string pseudout) {
 	this->setPseudo(pseudout); //pseudo
 	getline(file, donnee, ';'); //mdp
 	this->setMdp(donnee);
-	while (donnee != "f") {
+	while (donnee != "f") { //on stocke ses infos dans infos
 		getline(file, donnee, ';');
         if (donnee != "f" && donnee !="\n") {
             infos.push_back(stod(donnee));
@@ -79,8 +79,8 @@ vector<Uint32> StoreData(User uti) {
                         temps.clear();
 
                     }
-                    else if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT) {
-                        if (!(SDL_GetModState() & KMOD_SHIFT)) {
+                    else if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_CAPSLOCK) {
+                        if (!((SDL_GetModState() & KMOD_SHIFT)|| (SDL_GetModState() & KMOD_CAPS))) {
                             tapage += (char)tolower(*SDL_GetKeyName(event.key.keysym.sym));
                             temps.push_back(event.key.timestamp);
                         }
@@ -94,7 +94,7 @@ vector<Uint32> StoreData(User uti) {
                 break;
             case SDL_KEYUP:
                 if (event.key.repeat == 0) {
-                    if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_BACKSPACE && event.key.keysym.sym != SDLK_RETURN) {
+                    if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_BACKSPACE && event.key.keysym.sym != SDLK_RETURN && event.key.keysym.sym != SDLK_CAPSLOCK) {
                         temps.push_back(event.key.timestamp);
                     }
                 }
@@ -110,7 +110,7 @@ vector<Uint32> StoreData(User uti) {
 }
 
 
-vector<double> User::transfoEntree(vector<Uint32> entree) {
+vector<double> User::transfoEntree(vector<Uint32> entree) { //fct qui à partir de temps de frappe donne les valeurs à comparer pour les moyennes qu'on a choisi
     vector<double> entrebis;
     entrebis.push_back(entree[2*mdp.size() -1] - entree[0]);
     for (int j = 0; j < mdp.size(); j++) {
@@ -123,7 +123,8 @@ vector<double> User::transfoEntree(vector<Uint32> entree) {
     return(entrebis);
 }
 
-double User::CalculScore1(vector<Uint32> entree) { //calcule un score dépendant de l'écart entre l'entrée et la moyenne
+double User::CalculScore1(vector<Uint32> entree) { //fct qui calcul le score de compatibilité entre une personne et l'utilisateur qu'il prétend être en supposant des variables indépendantes
+    //si X est l'entrée, et M la moyenne, on renvoie ||X-M||^2/(||X||.||M||)
     vector<double> entrebis = this->transfoEntree(entree);
     vector<double> diff;
     for (int i = 0; i < entrebis.size(); i++) {
@@ -135,32 +136,32 @@ double User::CalculScore1(vector<Uint32> entree) { //calcule un score dépendant 
 }
 
 
-vector<vector <double>> User::calculL() {
+vector<vector <double>> User::calculL() { //calcul de la décomposition de cholesky de la matrice de covariance
     int n = 2 * mdp.size();
     vector<vector <double>> L;
     int indice = n;
     double l = sqrt(infos[indice]);
-    L.push_back({ l });
+    L.push_back({ l }); //terme en place 1,1
     indice += 1;
-    for (int i = 1; i < n; i++) {
+    for (int i = 1; i < n; i++) { //on remplit la première colonne
         L.push_back({ infos[indice] / l });
         indice += 1;
     }
-    for (int i = 1; i < n; i++) {
+    for (int i = 1; i < n; i++) { //on remplit les colonnes d'après
         double s = 0;
-        for (int k = 0; k < i; k++) {
+        for (int k = 0; k < i; k++) { 
             s += pow(L[i][k],2);
         }
-        l = sqrt(infos[indice] - s);
+        l = sqrt(infos[indice] - s); // si la matrice n'est pas symétrique définie positive, c'est ici qu'on a un problème
         for (int j = 0; j < n; j++) {
             if (j < i) {
-                L[j].push_back(0);
+                L[j].push_back(0); //on sait que L est triangulaire inférieure
             }
-            else if (i == j) {
+            else if (i == j) { //on applique la formule pour les termes diagonaux
                 L[i].push_back(l);
                 indice += 1;
-            }
-            else {
+            } 
+            else { //on applique la formule pour les termes non diagonaux
                 s = 0;
                 for (int k = 0; k < i; k++) {
                     s += L[i][k] * L[j][k];
@@ -173,24 +174,24 @@ vector<vector <double>> User::calculL() {
     return(L);
 }
 
-vector<vector <double>> User::Linversee() {
+vector<vector <double>> User::Linversee() {// inverse une matrice triangulaire inférieure de taille n
     vector<vector <double>> L = this->calculL();
     vector<vector <double>> I;
     int n = 2 * mdp.size();
     I.resize(n);
     for (int i = 0; i < n; i++) {
-        I[i].resize(n);
+        I[i].resize(n); // on fixe la taille de la matrice
     }
     for (int j = 0; j < n; j++) {
         for (int i = 0; i < n; i++) {
             if (j > i) {
-                I[i][j] = 0;
+                I[i][j] = 0; //la matrice finale sera triangulaire inférieure
             }
             else if (i == j) {
-                I[i][j] = 1 / L[i][j];
+                I[i][j] = 1 / L[i][j]; //les termes diagonaux de L^-1 sont l'inverse de ceux de L
             }
             else {
-                double s = 0;
+                double s = 0; // les termes non diagonaux sont calculés avec une méthode de substitution
                 for (int k = 0; k < i; k++) {
                     s -= L[i][k] * I[k][j];
                 }
@@ -202,14 +203,15 @@ vector<vector <double>> User::Linversee() {
 }
 
 double User::CalculScore2(vector<Uint32> entree) { //calcule un score dépendant de l'écart entre l'entrée et la moyenne mais avec des variables non independantes
+     //si X est l'entrée, et M la moyenne et E la matrice de covariance, on renvoie (X-M)^T*E^-1*(X-M)/(||X||.||M||)
     vector<double> entrebis = this->transfoEntree(entree);
     vector<double> diff;
     for (int i = 0; i < entrebis.size(); i++) {
         diff.push_back(entrebis[i] - this->infos[i]);
     }
     double normesup = norme(produitmatricevec(diff, this->Linversee()));
-    if (isnan(normesup)) {
-        cout << "Calcul de score 2 impossible, donnees insuffisantes" << endl;
+    if (isnan(normesup)) { //l'algo de calcul de L a bugué car la matrice de base n'etait pas symétrique définie positive
+        cout << "Calcul de score 2 impossible, matrice non inversible" << endl;
         return normesup;
     }
     double normeentrebis = norme(entrebis);

@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
                 double score2 = nouv.CalculScore2(donnees);
                 cout << "Votre score est de " << score1 << endl;
                 cout << "Votre score est de " << score2 << endl;
-                if (score1 < 0.0002 && score2 < 0.00007) {
+                if (score1 < 0.0002 && score2 < 0.00007) { //les seuils fixés sont peut etre à modifier
                     cout << "Accepte" << endl;
                 }
                 else {
@@ -100,18 +100,11 @@ int main(int argc, char* argv[]) {
             } while (reponse == "y");
             break; }
         case 6: {
-            cout << "Tapez le mdp" << endl;
-            string reponse = "";
-            cin >> reponse;
             UserMulti nouv;
-            reponse = "";
+            string reponse = "";
             do {
                 vector<Uint32> donnees = StoreData(nouv);
-                cout << "to do" << endl;
-                /* TO DO : 
-                -recuperer la chaque utilisateur et leur score
-                -renvoyer l'utilisateur avec le/les scores les plus bas
-                */
+                LectureusersMulti(donnees);
                 cout << "Souhaitez vous continuer ? (y/n)" << endl;
                 cin >> reponse;
             } while (reponse == "y");

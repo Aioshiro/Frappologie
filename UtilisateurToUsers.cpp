@@ -11,10 +11,10 @@ Utilisateur::Utilisateur(string pseudo, string mdp) {
 vector<vector<int>> Utilisateur::getTempsUt()const {
 	return TempsUt;
 }
-void Utilisateur::setTempsUt(vector<int> v) {
+void Utilisateur::addTempsUt(vector<int> v) { //ajoute une instance de tapage de mdp à l'utilisateur
 	TempsUt.push_back(v);
 }
-void Utilisateur::setTempsUt() {
+void Utilisateur::setTempsUt(){ //set les temps de tapage d'un utilisateur à partir des données de son fichier
     ifstream file;
     file.open(pseudo + ".txt", ifstream::in);
     string donnee = "";
@@ -22,15 +22,15 @@ void Utilisateur::setTempsUt() {
     getline(file, donnee, ';'); //mdp
     donnee = "";
     vector<int> tempstappage;
-    while (file.peek() != EOF) {
-        while (donnee != "f" && donnee != "\n") {
+    while (file.peek() != EOF) { // tant qu'on n'a pas fini de lire le fichier
+        while (donnee != "f" && donnee != "\n") { //tant qu'on est pas à la fin de la ligne, ie de l'instance de mdp tapé
             getline(file, donnee, ';');
             if (donnee != "f" && donnee != "\n") {
-                tempstappage.push_back(stoi(donnee));
+                tempstappage.push_back(stoi(donnee)); //on stocke les temps de tapage dans un vecteur
             }
         }
-        if (!tempstappage.empty()) {
-            this->setTempsUt(tempstappage);
+        if (!tempstappage.empty()) { //si on a bien des données à mettre
+            this->addTempsUt(tempstappage); //on les rajoute dans l'utilisateur
             tempstappage.clear();
         }
         donnee = "";
@@ -68,7 +68,7 @@ double Utilisateur::covariance_ij(int xa, int xb,int ya ,int yb) {// calcule la 
     return(covariance / n);
 }
 
-void Utilisateur::writeToFileold() {
+void Utilisateur::writeToFileold() { // désuet
 	ofstream fs;
 	fs.open("users.txt", ofstream::out | ofstream::app);
     //std::cout << (TempsUt[0]).size() - 1 << endl;
@@ -142,7 +142,7 @@ void Utilisateur::writeToFile() { //crée ou met a jour le fichier users.txt
     for (int j = 0; j < mdp.size() - 1; j++) {
         fs1 << this->moyenne_ij(2 * j, 2 * j + 2) << ';';
     } // Calculs et écriture dans le fichier des moyennes temps entre un premier début d'appui et un second
-    /*Calcul de la partie supérieur de la matrice de covariance*/
+    //Calcul de la partie supérieur de la matrice de covariance
     fs1 << this->variance_ij(0, TempsUt[0].size() - 1) << ';';
     for (int i = 0; i < mdp.size(); i++) {
         fs1 << this->covariance_ij(0, TempsUt[0].size() - 1, 2 * i, 2 * i + 1) << ';'; //Covariance entre le temps total et les temps d'appuis
@@ -170,7 +170,8 @@ void Utilisateur::writeToFile() { //crée ou met a jour le fichier users.txt
 }
 
 
-Utilisateur UserConstruct() {
+Utilisateur UserConstruct() //inutilisé
+{
 	ifstream file;
 	file.open("utilisateurA.txt", ifstream::in);
 	string donnee = "";
@@ -187,18 +188,18 @@ Utilisateur UserConstruct() {
 				tempstappage.push_back(stod(donnee));
 			}
 		}
-		uti.setTempsUt(tempstappage);
+		uti.addTempsUt(tempstappage);
 	}
 	file.close();
 	return uti;
 }
 
-ostream& operator<<(ostream& os, const Utilisateur& user) {
+ostream& operator<<(ostream& os, const Utilisateur& user) {//set les temps de tapage d'un utilisateur à partir des données de son fichier
 	os << "Pseudo :" << user.getPseudo() << "Mdp :" << user.getMdp() << endl;
 	return os;
 }
 
-void CreerFichierUti() {
+void CreerFichierUti() { //crée un nouveau fichier pseudo.txt en demandant à l'utilisateur son pseudo et son mdp
     Utilisateur uti;
     string tapage = "";
     std::cout << "Entrez pseudo" << endl;
@@ -255,8 +256,8 @@ void StoreData(Utilisateur user) { //enregistre une nouvelle instance de mot de 
                         temps.clear();
 
                     }
-                    else if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT) {
-                        if (!(SDL_GetModState() & KMOD_SHIFT)) { //si on appuie sur une lettre minuscule, on l'ajoute ainsi que le temps
+                    else if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_CAPSLOCK) {
+                        if (!((SDL_GetModState() & KMOD_SHIFT) || (SDL_GetModState() & KMOD_CAPS))) { //si on appuie sur une lettre minuscule, on l'ajoute ainsi que le temps
                             tapage += (char)tolower(*SDL_GetKeyName(event.key.keysym.sym));
                             temps.push_back(event.key.timestamp);
                         }
@@ -270,7 +271,7 @@ void StoreData(Utilisateur user) { //enregistre une nouvelle instance de mot de 
                 break;
             case SDL_KEYUP: //quand on relache une touche
                 if (event.key.repeat == 0) {
-                    if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_BACKSPACE && event.key.keysym.sym != SDLK_RETURN) {
+                    if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_BACKSPACE && event.key.keysym.sym != SDLK_RETURN && event.key.keysym.sym != SDLK_CAPSLOCK) {
                         temps.push_back(event.key.timestamp);
                     }
                 }

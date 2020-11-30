@@ -12,15 +12,15 @@ using namespace std;
 
 //permet d'enregistrer les infos de tapage brut
 class Utilisateur : public UtilisateurBase{
+protected:
+	vector<vector<int>> TempsUt; //chaque case du vecteur est un vecteur contenant les temps d'appui et de relachement des touches du mdp
 public:
-	vector<vector<int>> TempsUt;
-
 	Utilisateur();
 	Utilisateur(string pseudo, string mdp);
 
 	vector<vector<int>> getTempsUt()const;
-	void setTempsUt(vector<int> v);
-	void setTempsUt();
+	void addTempsUt(vector<int> v); //ajoute une instance de tapage de mdp à l'utilisateur
+	void setTempsUt(); //set les temps de tapage d'un utilisateur à partir des données de son fichier
 
 	double moyenne_ij(int a, int b); // calcule la moyenne de la différence des colonnes a et b de tempsut 
 	double variance_ij(int a, int b);// calcule la variance de la différence des colonnes a et b de tempsut
@@ -33,7 +33,7 @@ public:
 
 Utilisateur UserConstruct(); //desuet
 
-ostream& operator<<(ostream& os, const Utilisateur& user); //affichage utilisateur pour tests
+ostream& operator<<(ostream& os, const Utilisateur& user); //surchage << pour afficher un utilisateur
 
 void CreerFichierUti(); //crée un nouveau fichier pseudo.txt en demandant à l'utilisateur son pseudo et son mdp
 

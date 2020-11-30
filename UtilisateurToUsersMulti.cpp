@@ -8,26 +8,23 @@ UtilisateurMulti::UtilisateurMulti(string pseudo) {
     this->pseudo = pseudo;
     mdp = "realite virtuelle";
 }
-void UtilisateurMulti::setTempsUt(vector<int> v) {
-    TempsUt.push_back(v);
-}
 
-void UtilisateurMulti::setTempsUt() {
+void UtilisateurMulti::setTempsUt() { //set les temps de tapage d'un utilisateur à partir des données de son fichier
     ifstream file;
     file.open(pseudo + "Multi.txt", ifstream::in);
     string donnee = "";
     getline(file, donnee, ';'); //pseudo
     donnee = "";
     vector<int> tempstappage;
-    while (file.peek() != EOF) {
-        while (donnee != "f" && donnee != "\n") {
+    while (file.peek() != EOF) { // tant qu'on n'a pas fini de lire le fichier
+        while (donnee != "f" && donnee != "\n") { //tant qu'on est pas à la fin de la ligne, ie de l'instance de mdp tapé
             getline(file, donnee, ';');
             if (donnee != "f" && donnee != "\n") {
-                tempstappage.push_back(stoi(donnee));
+                tempstappage.push_back(stoi(donnee)); //on stocke les temps de tapage dans un vecteur
             }
         }
-        if (!tempstappage.empty()) {
-            this->setTempsUt(tempstappage);
+        if (!tempstappage.empty()) { //si on a bien des données à mettre
+            this->addTempsUt(tempstappage); //on les rajoute dans l'utilisateur
             tempstappage.clear();
         }
         donnee = "";
@@ -180,8 +177,8 @@ void StoreData(UtilisateurMulti user) { //enregistre une nouvelle instance de mo
                         temps.clear();
 
                     }
-                    else if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT) {
-                        if (!(SDL_GetModState() & KMOD_SHIFT)) { //si on appuie sur une lettre minuscule, on l'ajoute ainsi que le temps
+                    else if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_CAPSLOCK) {
+                        if (!((SDL_GetModState() & KMOD_SHIFT) || (SDL_GetModState() & KMOD_CAPS))) { //si on appuie sur une lettre minuscule, on l'ajoute ainsi que le temps
                             tapage += (char)tolower(*SDL_GetKeyName(event.key.keysym.sym));
                             temps.push_back(event.key.timestamp);
                         }
@@ -195,7 +192,7 @@ void StoreData(UtilisateurMulti user) { //enregistre une nouvelle instance de mo
                 break;
             case SDL_KEYUP: //quand on relache une touche
                 if (event.key.repeat == 0) {
-                    if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_BACKSPACE && event.key.keysym.sym != SDLK_RETURN) {
+                    if (event.key.keysym.sym != SDLK_LSHIFT && event.key.keysym.sym != SDLK_RSHIFT && event.key.keysym.sym != SDLK_BACKSPACE && event.key.keysym.sym != SDLK_RETURN && event.key.keysym.sym != SDLK_CAPSLOCK) {
                         temps.push_back(event.key.timestamp);
                     }
                 }

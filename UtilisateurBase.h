@@ -4,10 +4,10 @@ using namespace std;
 
 class UtilisateurBase
 {
-public:
+protected:
 	string pseudo;
 	string mdp;
-
+public:
 	string getPseudo()const;
 	string getMdp()const;
 	void setPseudo(string pseudo);
